@@ -23,5 +23,12 @@ class ContactView(APIView):
         subject = "Contact Inquiry"
         message = request.data['message']
         recipient = request.data['recipient']
-        send_mail(subject, message, 'noreply@occupationsite.com', [recipient])
-        return Response({'status': 'email sent'})
+        
+        if not recipient or not message:
+            return Response({'error': 'Recipient and message are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            send_mail(subject, message, 'noreply@occupationsite.com', [recipient])
+            return Response({'status': 'email sent'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
